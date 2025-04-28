@@ -5,7 +5,7 @@ structure:
     name: cmd
   - type: dir
     name: internal
-    children: # Directories can have children
+    children:
       - type: file # Define a file
         name: core.go
   - type: file
