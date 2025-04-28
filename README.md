@@ -24,7 +24,4 @@ ForgeDir is currently under active development and serves as a practical project
 
 ### Installation
 
-You can install ForgeDir using `go install`:
-
-```bash
-go install [github.com/YourGitHubUsername/forgedir@latest](https://github.com/YourGitHubUsername/forgedir@latest) # Replace YourGitHubUsername
+SOON
