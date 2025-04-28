@@ -1,0 +1,22 @@
+# config.yaml
+projectName: my_project
+structure:
+  - type: dir # Define a directory
+    name: cmd
+  - type: dir
+    name: internal
+    children: # Directories can have children
+      - type: file # Define a file
+        name: core.go
+  - type: file
+    name: main.go
+  - type: dir
+    name: pkg
+    children:
+      - type: file
+        name: utils.go
+      - type: dir
+        name: api
+        children:
+          - type: file
+            name: handlers.go
