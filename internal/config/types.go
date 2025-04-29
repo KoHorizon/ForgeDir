@@ -1,12 +1,12 @@
 package config
 
-type Node struct {
-	Type     string `yaml:"type"`
-	Name     string `yaml:"name"`
-	Children []Node `yaml:"children, omitempty"`
+type StructureNode struct {
+	Type     string          `yaml:"type"`
+	Name     string          `yaml:"name"`
+	Children []StructureNode `yaml:"children, omitempty"`
 }
 
 type Config struct {
-	ProjectName string `yaml:"projectName"`
-	Structure   []Node `yaml:"structure"`
+	ProjectName string          `yaml:"projectName"`
+	Structure   []StructureNode `yaml:"structure"`
 }

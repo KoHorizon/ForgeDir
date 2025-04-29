@@ -3,13 +3,14 @@ projectName: my_project
 structure:
   - type: dir # Define a directory
     name: cmd
+    children:
+      - type: file
+        name: main.go
   - type: dir
     name: internal
     children:
       - type: file # Define a file
         name: core.go
-  - type: file
-    name: main.go
   - type: dir
     name: pkg
     children:
