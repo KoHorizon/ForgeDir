@@ -1,5 +1,11 @@
 package config
 
+const (
+	TypeDir  = "dir"
+	TypeFile = "file"
+	// Other type to expand
+)
+
 type StructureNode struct {
 	Type     string          `yaml:"type"`
 	Name     string          `yaml:"name"`

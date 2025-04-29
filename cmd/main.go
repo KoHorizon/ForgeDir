@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	configName := "config.yaml"
+	configName := "./config.yaml"
 
 	cfg, err := config.LoadConfigFromYaml(configName)
 	if err != nil {

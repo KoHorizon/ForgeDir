@@ -1,7 +1,6 @@
 package builder
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -39,11 +38,8 @@ func CreateFolder(folderPath string) error {
 
 // CreateFolderWithPermission creates a folder with custom permissions
 func CreateFolderWithPermission(folderPath string, permission os.FileMode) error {
-	err := os.Mkdir(folderPath, permission)
+	err := os.MkdirAll(folderPath, permission)
 	if err != nil {
-		if errors.Is(err, os.ErrExist) {
-			return nil
-		}
 		return err
 	}
 	fmt.Printf("Created folder: %s\n", folderPath)
@@ -80,12 +76,12 @@ func CreateStructureNodes(nodes []config.StructureNode, currentPath string) erro
 		var err error
 
 		switch node.Type {
-		case "dir":
+		case config.TypeDir:
 			err = CreateFolder(filePath)
 			if err == nil {
 				err = CreateStructureNodes(node.Children, filePath)
 			}
-		case "file":
+		case config.TypeFile:
 			err = CreateFile(filePath)
 		default:
 			err = fmt.Errorf("unknown node type: %s (name: %s)", node.Type, node.Name)
