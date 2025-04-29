@@ -77,21 +77,21 @@ func CreateStructure(cfg *config.Config, pathToCreate string) error {
 func CreateStructureNodes(nodes []config.StructureNode, currentPath string) error {
 	for _, node := range nodes {
 		filePath := filepath.Join(currentPath, node.Name)
-		if node.Type == "dir" {
-			err := CreateFolder(filePath)
-			if err != nil {
-				return err
-			}
-			err = CreateStructureNodes(node.Children, filePath)
-			if err != nil {
-				return err
-			}
-		} else if node.Type == "file" {
-			err := CreateFile(filePath)
-			if err != nil {
-				return err
-			}
+		var err error
 
+		switch node.Type {
+		case "dir":
+			err = CreateFolder(filePath)
+			if err == nil {
+				err = CreateStructureNodes(node.Children, filePath)
+			}
+		case "file":
+			err = CreateFile(filePath)
+		default:
+			err = fmt.Errorf("unknown node type: %s (name: %s)", node.Type, node.Name)
+		}
+		if err != nil {
+			return err
 		}
 	}
 
