@@ -3,9 +3,6 @@ package builder
 import (
 	"fmt"
 	"os"
-	"path/filepath"
-
-	"github.com/KoHorizon/ForgeDir/internal/config"
 )
 
 // Common Folder Permissions:
@@ -31,13 +28,13 @@ import (
 // Format: 0<Owner><Group><Others> (each digit is a sum of r=4, w=2, x=1)
 // Note: Permissions are based on standard UNIX file mode bits, stable across Go versions.
 
-// CreateFolder creates a folder with default permission 0755 (Owner: rwx, Group/Others: r-x)
-func CreateFolder(folderPath string) error {
-	return CreateFolderWithPermission(folderPath, 0755)
+// createFolder creates a folder with default permission 0755 (Owner: rwx, Group/Others: r-x)
+func createFolder(folderPath string) error {
+	return createFolderWithPermission(folderPath, 0755)
 }
 
-// CreateFolderWithPermission creates a folder with custom permissions
-func CreateFolderWithPermission(folderPath string, permission os.FileMode) error {
+// createFolderWithPermission creates a folder with custom permissions
+func createFolderWithPermission(folderPath string, permission os.FileMode) error {
 	err := os.MkdirAll(folderPath, permission)
 	if err != nil {
 		return err
@@ -46,50 +43,22 @@ func CreateFolderWithPermission(folderPath string, permission os.FileMode) error
 	return nil
 }
 
-// CreateFile creates a file with default permission 0644 (Owner: read/write, Group/Others: read only)
-func CreateFile(filePath string) error {
-	return CreateFileWithPermission(filePath, 0644)
+// createFile creates a file with default permission 0644 (Owner: read/write, Group/Others: read only)
+func createFile(filePath string) error {
+	return createFileWithPermission(filePath, 0644)
 }
 
-// CreateFileWithPermission creates a file with custom permission
+// createFileWithPermission creates a file with custom permission
 // Flags used :
 // - os.O_CREATE: Create the file if it doesn't exist
 // - os.O_WRONLY: Open the file for write-only access
 // - os.O_TRUNC:  Truncate the file if it already exists (clear contents)
-func CreateFileWithPermission(filePath string, permission os.FileMode) error {
+func createFileWithPermission(filePath string, permission os.FileMode) error {
 	file, err := os.OpenFile(filePath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, permission)
 	if err != nil {
 		return err
 	}
 	defer file.Close()
 	fmt.Printf("Created file : %s\n", filePath)
-	return nil
-}
-
-func CreateStructure(cfg *config.Config, pathToCreate string) error {
-	return CreateStructureNodes(cfg.Structure, pathToCreate)
-}
-
-func CreateStructureNodes(nodes []config.StructureNode, currentPath string) error {
-	for _, node := range nodes {
-		filePath := filepath.Join(currentPath, node.Name)
-		var err error
-
-		switch node.Type {
-		case config.TypeDir:
-			err = CreateFolder(filePath)
-			if err == nil {
-				err = CreateStructureNodes(node.Children, filePath)
-			}
-		case config.TypeFile:
-			err = CreateFile(filePath)
-		default:
-			err = fmt.Errorf("unknown node type: %s (name: %s)", node.Type, node.Name)
-		}
-		if err != nil {
-			return err
-		}
-	}
-
 	return nil
 }
