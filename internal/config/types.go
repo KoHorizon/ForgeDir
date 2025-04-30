@@ -9,10 +9,11 @@ const (
 type StructureNode struct {
 	Type     string          `yaml:"type"`
 	Name     string          `yaml:"name"`
-	Children []StructureNode `yaml:"children, omitempty"`
+	Children []StructureNode `yaml:"children,omitempty"`
 }
 
 type Config struct {
 	ProjectName string          `yaml:"projectName"`
+	Language    string          `yaml:"language"`
 	Structure   []StructureNode `yaml:"structure"`
 }
