@@ -22,7 +22,6 @@ func (g *GoGenerator) GetLanguage() string {
 func (g *GoGenerator) Generate(cfg *config.Config, projectRoot string) error {
 	fmt.Printf("GoGenerator: Generating boilerplate for project '%s' in %s\n", cfg.ProjectName, projectRoot)
 
-	// structureRoot := filepath.Join(projectRoot, "tmp", "generated-structure")
 	goFiles, err := collectGoFiles(projectRoot)
 	if err != nil {
 		return fmt.Errorf("failed to collect .go files: %w", err)
