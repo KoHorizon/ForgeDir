@@ -13,31 +13,36 @@ func main() {
 	configName := "./config.yaml"
 	projectRoot := "../tmp/generated-structure"
 
+	// Load the project configuration from YAML
 	cfg, err := config.LoadConfigFromYaml(configName)
 	if err != nil {
 		log.Fatalf("Failed to load configuration from %s: %v", configName, err)
 	}
 
-	err = builder.CreateStructure(cfg, projectRoot)
-	if err != nil {
+	// Build the project directory structure
+	fs := builder.NewOSFileSystemCreator()
+	opts := builder.CreateStructureOptions{
+		FS:   fs,
+		Cfg:  cfg,
+		Root: projectRoot,
+	}
+	if err := builder.CreateStructure(opts); err != nil {
 		log.Fatalf("Failed to create strucure : %v", err)
 	}
 
-	// Declare and initialize the map with the instance directly
-	goGenerator := &generator.GoGenerator{}
-	availableGenerators := map[string]generator.BoilerplateGenerator{
-		goGenerator.GetLanguage(): goGenerator,
-	}
-	// Inject all the generator as depedency for Coodinator
+	// Prepare and inject all available code generators into the coordinator
+	availableGenerators := generator.All()
 	coordinator := generator.NewCoordinator(availableGenerators)
 
-	// Start of boilerplate generation
+	// Generate language-specific boilerplate
 	fmt.Printf("Running boilerplate generation for language '%s'...\n", cfg.Language)
 	err = coordinator.RunBoilerplateGeneration(cfg, projectRoot)
 	if err != nil {
 		// Log a fatal error if boilerplate generation fails
 		log.Fatalf("Boilerplate generation failed: %v", err)
 	}
+
+	// Generate language-specific boilerplate
 	fmt.Println("Boilerplate generation completed successfully.")
 	fmt.Println("ForgeDir finished project generation.")
 }

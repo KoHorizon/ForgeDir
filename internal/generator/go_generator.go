@@ -1,138 +1,98 @@
 package generator
 
 import (
+	"bytes"
+	"embed"
 	"fmt"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
+	"text/template"
 
 	"github.com/KoHorizon/ForgeDir/internal/config"
 )
 
+//go:embed templates/go/*.tmpl
+var goTemplates embed.FS
+
+// tmpl holds parsed Go templates from the embedded filesystem.
+var tmpl = template.Must(
+	template.New("go").ParseFS(goTemplates, "templates/go/*.tmpl"),
+)
+
+// GoGenerator implements BoilerplateGenerator using external Go templates.
 type GoGenerator struct{}
 
 var _ BoilerplateGenerator = (*GoGenerator)(nil)
 
 // GetLanguage returns the language this generator supports.
-func (g *GoGenerator) GetLanguage() string {
-	return "go"
+func (g *GoGenerator) GetLanguage() string { return "go" }
+
+// init registers this generator during package initialization.
+func init() {
+	Register(&GoGenerator{})
 }
 
-// Generate scans the generated structure and injects boilerplate content for each .go file.
+// Generate scans for .go files under projectRoot and applies matching templates
+// or falls back to a minimal stub if no template is defined.
 func (g *GoGenerator) Generate(cfg *config.Config, projectRoot string) error {
-	fmt.Printf("GoGenerator: Generating boilerplate for project '%s' in %s\n", cfg.ProjectName, projectRoot)
+	fmt.Printf("GoGenerator: Generating boilerplate for project '%s' in %s\n",
+		cfg.ProjectName, projectRoot)
 
-	goFiles, err := collectGoFiles(projectRoot)
-	if err != nil {
-		return fmt.Errorf("failed to collect .go files: %w", err)
-	}
-
-	for _, file := range goFiles {
-		pkg := determinePackageName(file, projectRoot)
-		fileName := filepath.Base(file)
-
-		content, err := generateContentForFile(pkg, fileName)
+	return filepath.WalkDir(projectRoot, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
-			return fmt.Errorf("failed to generate content for %s: %w", file, err)
+			return err
+		}
+		// Only process .go files
+		if d.IsDir() || !strings.HasSuffix(d.Name(), ".go") {
+			return nil
 		}
 
-		if err := os.WriteFile(file, []byte(content), 0644); err != nil {
-			return fmt.Errorf("failed to write to %s: %w", file, err)
-		}
-	}
+		// Build tmpl name, e.g. "main.go.tmpl"
+		tmplName := d.Name() + ".tmpl"
+		tpl := tmpl.Lookup(tmplName)
 
-	return nil
-}
+		// Prepare common data
+		pkg := determinePackageName(path, projectRoot)
+		name := strings.TrimSuffix(d.Name(), ".go")
 
-// collectGoFiles recursively finds all .go files under a given root directory.
-func collectGoFiles(root string) ([]string, error) {
-	var files []string
+		// If we don’t have a specific template, write the default stub
+		if tpl == nil {
+			defaultContent := fmt.Sprintf(
+				"package %s\n\n// TODO: implement %s\n",
+				pkg, name,
+			)
+			return os.WriteFile(path, []byte(defaultContent), 0644)
+		}
 
-	err := filepath.WalkDir(root, func(path string, d os.DirEntry, err error) error {
-		if err != nil {
-			return fmt.Errorf("error walking path %s: %w", path, err)
+		// Otherwise render via text/template
+		data := struct {
+			PackageName string
+			FileName    string
+		}{
+			PackageName: pkg,
+			FileName:    name,
 		}
-		if !d.IsDir() && strings.HasSuffix(d.Name(), ".go") {
-			files = append(files, path)
+
+		var buf bytes.Buffer
+		if err := tpl.Execute(&buf, data); err != nil {
+			return fmt.Errorf("error executing template %s: %w", tmplName, err)
 		}
-		return nil
+
+		return os.WriteFile(path, buf.Bytes(), 0644)
 	})
-
-	return files, err
 }
 
-// determinePackageName infers the Go package name based on file's directory structure.
+// determinePackageName infers the Go package name based on directory structure.
 func determinePackageName(filePath, root string) string {
 	dir := filepath.Dir(filePath)
-
-	relPath, err := filepath.Rel(root, dir)
-	if err != nil || relPath == "." {
+	rel, err := filepath.Rel(root, dir)
+	if err != nil || rel == "." {
 		return "main"
 	}
-
-	if strings.HasPrefix(relPath, "cmd") {
+	if strings.HasPrefix(rel, "cmd") {
 		return "main"
 	}
-
 	return filepath.Base(dir)
-}
-
-// generateContentForFile chooses the correct template based on filename and package.
-func generateContentForFile(pkgName, fileName string) (string, error) {
-	if genFunc, ok := fileTemplateMap[fileName]; ok {
-		return genFunc(pkgName), nil
-	}
-
-	// Fallback template
-	return fmt.Sprintf(`package %s
-
-// TODO: implement %s
-`, pkgName, fileName), nil
-}
-
-// fileTemplateMap maps specific filenames to content generators.
-var fileTemplateMap = map[string]func(pkg string) string{
-	"main.go": func(pkg string) string {
-		return fmt.Sprintf(`package %s
-
-import "fmt"
-
-func main() {
-	fmt.Println("This is the main entry point!")
-}
-`, pkg)
-	},
-
-	"handler.go": func(pkg string) string {
-		return fmt.Sprintf(`package %s
-
-import "net/http"
-
-func Handler(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Hello from handler"))
-}
-`, pkg)
-	},
-
-	"service.go": func(pkg string) string {
-		return fmt.Sprintf(`package %s
-
-type Service struct {}
-
-func (s *Service) DoSomething() string {
-	return "Service logic here"
-}
-`, pkg)
-	},
-
-	"controller.go": func(pkg string) string {
-		return fmt.Sprintf(`package %s
-
-type Controller struct {}
-
-func (c *Controller) HandleRequest() {
-	// TODO: implement controller logic
-}
-`, pkg)
-	},
 }

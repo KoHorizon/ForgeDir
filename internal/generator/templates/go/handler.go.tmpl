@@ -1,0 +1,10 @@
+package {{ .PackageName }}
+
+import (
+    "net/http"
+)
+
+// Handler handles HTTP requests for the {{ .FileName }} resource.
+func Handler(w http.ResponseWriter, r *http.Request) {
+    w.Write([]byte("Hello from {{ .FileName }}"))
+}
