@@ -16,7 +16,7 @@ structure:
     name: pkg
     children:
       - type: file
-        name: utils.go
+        name: handler.go
       - type: dir
         name: api
         children:

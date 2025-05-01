@@ -1,0 +1,9 @@
+package {{ .PackageName }}
+
+// Service encapsulates the business logic for {{ .FileName }}.
+type Service struct{}
+
+// DoSomething performs an action and returns a result.
+func (s *Service) DoSomething() string {
+    return "Service logic for {{ .FileName }}!"
+}

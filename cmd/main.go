@@ -24,10 +24,7 @@ func main() {
 	}
 
 	// Declare and initialize the map with the instance directly
-	goGenerator := &generator.GoGenerator{}
-	availableGenerators := map[string]generator.BoilerplateGenerator{
-		goGenerator.GetLanguage(): goGenerator,
-	}
+	availableGenerators := generator.All()
 	// Inject all the generator as depedency for Coodinator
 	coordinator := generator.NewCoordinator(availableGenerators)
 
