@@ -7,9 +7,17 @@ import (
 	"github.com/KoHorizon/ForgeDir/internal/config"
 )
 
-func CreateStructure(cfg *config.Config, pathToCreate string) error {
-	realFSCreator := NewOSFileSystemCreator() // Use the constructor
-	return createStructureNodes(realFSCreator, cfg.Structure, pathToCreate)
+type CreateStructureOptions struct {
+	FS   FileSystemCreator
+	Cfg  *config.Config
+	Root string
+}
+
+func CreateStructure(opts CreateStructureOptions) error {
+	fs := opts.FS
+	structure := opts.Cfg.Structure
+	root := opts.Root
+	return createStructureNodes(fs, structure, root)
 }
 
 func createStructureNodes(fsCreator FileSystemCreator, nodes []config.StructureNode, currentPath string) error {
