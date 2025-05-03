@@ -20,7 +20,7 @@ var (
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "fgdir",
-	Short: "Scaffold a Go project from a YAML spec",
+	Short: "Scaffold a project structure from your YAML spec",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		// 1. Load
 		cfg, err := config.LoadConfigFromYaml(cfgFile)
@@ -48,17 +48,28 @@ var rootCmd = &cobra.Command{
 }
 
 func init() {
-	// Here you will define your flags and configuration settings.
-	// Cobra supports persistent flags, which, if defined here,
-	// will be global for your application.
+	// Persistent flags are available to all subcommands and
+	// control global behavior of the CLI.
+	rootCmd.PersistentFlags().StringVarP(
+		&cfgFile,
+		"config", "c",
+		"config.yaml",
+		"path to the YAML project spec",
+	)
+	rootCmd.PersistentFlags().StringVarP(
+		&outputDir,
+		"output", "o",
+		"./tmp/generated-structure",
+		"directory where the project will be generated",
+	)
 
-	// rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.ForgeDir.yaml)")
-
-	// Cobra also supports local flags, which will only run
-	// when this action is called directly.
-	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-	rootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "config.yaml", "path to your YAML spec")
-	rootCmd.PersistentFlags().StringVarP(&outputDir, "output", "o", "./tmp/generated-structure", "where to create the project")
+	// Local flags apply only to the root command.
+	// (You can remove this if you’re not actually using “toggle”.)
+	rootCmd.Flags().BoolP(
+		"toggle", "t",
+		false,
+		"help message for toggle",
+	)
 }
 
 // Execute runs the CLI.
