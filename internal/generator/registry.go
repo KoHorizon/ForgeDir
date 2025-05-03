@@ -10,8 +10,8 @@ var (
 	registered = make(map[string]BoilerplateGenerator)
 )
 
-// Register adds a new BoilerplateGenerator to the registry under its
-// language key. It panics on duplicate registrations.
+// Register registers a new generator under its language key
+// and panics if that key is already in use.
 func Register(g BoilerplateGenerator) {
 	lang := g.GetLanguage()
 	if _, exists := registered[lang]; exists {
@@ -20,8 +20,8 @@ func Register(g BoilerplateGenerator) {
 	registered[lang] = g
 }
 
-// All returns a shallow copy of the registry map, so callers can inject
-// all registered generators without mutating the internal state.
+// All returns a copy of the registry so callers can safely enumerate
+// without mutating internal state.
 func All() map[string]BoilerplateGenerator {
 	copy := make(map[string]BoilerplateGenerator, len(registered))
 	maps.Copy(copy, registered)
