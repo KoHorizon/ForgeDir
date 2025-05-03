@@ -54,7 +54,7 @@ Contributing to ForgeDir is easy and encouraged under the project's MIT License.
 3. **Make your changes.**
 4. **Commit your changes:** `git commit -m "feat: add my feature"`
 5. **Push to your branch:** `git push origin feature/my-feature`
-6. **Open a Pull Request** against the `main` branch.
+6. **Open a Pull Request** against the `dev` branch (or whichever branch is currently active for development).
 
 By contributing, you agree that your work will be licensed under the MIT License. No additional Contributor License Agreement (CLA) is required unless otherwise stated.
 
