@@ -7,39 +7,39 @@ import (
 	"github.com/KoHorizon/ForgeDir/internal/config"
 )
 
-type CreateStructureOptions struct {
-	FS   FileSystemCreator
-	Cfg  *config.Config
-	Root string
+// StructureBuilder builds a project scaffold.
+type StructureBuilder struct {
+	fs FileSystemCreator
 }
 
-func CreateStructure(opts CreateStructureOptions) error {
-	fs := opts.FS
-	structure := opts.Cfg.Structure
-	root := opts.Root
-	return createStructureNodes(fs, structure, root)
+func NewStructureBuilder(fs FileSystemCreator) *StructureBuilder {
+	return &StructureBuilder{fs: fs}
 }
 
-func createStructureNodes(fsCreator FileSystemCreator, nodes []config.StructureNode, currentPath string) error {
+// Build uses the Config's Structure tree to instantiate folders & files under root.
+func (b *StructureBuilder) Build(cfg *config.Config, root string) error {
+	return b.createNodes(cfg.Structure, root)
+}
+
+// createNodes is the recursive guts of Build.
+func (b *StructureBuilder) createNodes(nodes []config.StructureNode, currPath string) error {
 	for _, node := range nodes {
-		filePath := filepath.Join(currentPath, node.Name)
-		var err error
-
+		target := filepath.Join(currPath, node.Name)
 		switch node.Type {
 		case config.TypeDir:
-			err = fsCreator.CreateFolder(filePath, DefaultFolderPermission)
-			if err == nil {
-				err = createStructureNodes(fsCreator, node.Children, filePath)
+			if err := b.fs.CreateFolder(target, DefaultFolderPermission); err != nil {
+				return fmt.Errorf("mkdir %q: %w", target, err)
+			}
+			if err := b.createNodes(node.Children, target); err != nil {
+				return err
 			}
 		case config.TypeFile:
-			err = fsCreator.CreateFile(filePath, DefaultFilePermission)
+			if err := b.fs.CreateFile(target, DefaultFilePermission); err != nil {
+				return fmt.Errorf("touch %q: %w", target, err)
+			}
 		default:
-			err = fmt.Errorf("unknown node type: %s (name: %s)", node.Type, node.Name)
-		}
-		if err != nil {
-			return err
+			return fmt.Errorf("unknown node type %q for %q", node.Type, node.Name)
 		}
 	}
-
 	return nil
 }
