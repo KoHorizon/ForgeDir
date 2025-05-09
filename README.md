@@ -19,11 +19,9 @@ ForgeDir is a CLI tool written in Go that scaffolds a project structure from a s
    * [Commands](#commands)
 4. [Specification (`spec.yaml`)](#specification-specyaml)
 5. [Custom Templates](#custom-templates)
-6. [Publishing & Releases](#publishing--releases)
-7. [Versioning](#versioning)
-8. [Testing](#testing)
-9. [Contributing](#contributing)
-10. [License](#license)
+6. [Testing](#testing)
+7. [Contributing](#contributing)
+8. [License](#license)
 
 ---
 
@@ -154,44 +152,6 @@ The lookup order is:
 2. Built-in embedded templates (go\:embed defaults)
 
 Missing files still fall back to defaults, so you only need to override the ones you care about.
-
----
-
-## Publishing & Releases
-
-1. **Push your code** to a public repo (e.g. GitHub) with module path in `go.mod`:
-
-   ```go
-   module github.com/yourname/forgedir
-   ```
-
-2. **Tag a release**:
-
-   ```bash
-   git tag v0.1.0
-   git push origin v0.1.0
-   ```
-
-3. **Instruct users to install via**:
-
-   ```bash
-   go install github.com/yourname/forgedir@v0.1.0
-   ```
-
-4. (Optional) Use [goreleaser](https://goreleaser.com/) in CI to publish pre‑built binaries for Linux/Mac/Windows on GitHub Releases.
-
-5. (Optional) Provide Homebrew/Scoop/Apt formulas so users can install via package managers.
-
----
-
-## Versioning
-
-We follow [Semantic Versioning](https://semver.org/):
-
-* **v0.x**: initial development, breaking changes allowed
-* **v1.0.0**: stable release, backwards compatibility guaranteed
-
-Tag incremental releases (v0.2.0, v0.3.0, …) as you add features and tests. Reserve `v1.0.0` for an API‑stable milestone.
 
 ---
 
