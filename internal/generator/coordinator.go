@@ -1,3 +1,4 @@
+// coordinator.go
 package generator
 
 import (
@@ -8,22 +9,24 @@ import (
 )
 
 type Coordinator struct {
-	LanguageBoilerplate map[string]BoilerplateGenerator
+	LanguageBoilerplate map[string]Generator
 }
 
-func NewCoordinator(languages map[string]BoilerplateGenerator) *Coordinator {
-	return &Coordinator{
-		LanguageBoilerplate: languages,
+// Now take a slice of Generator (which matches registry.All())
+func NewCoordinator(gens []Generator) *Coordinator {
+	m := make(map[string]Generator, len(gens))
+	for _, g := range gens {
+		m[g.GetLanguage()] = g
 	}
+	return &Coordinator{LanguageBoilerplate: m}
 }
 
 func (c *Coordinator) RunBoilerplateGeneration(cfg *config.Config, projectRoot string) error {
-	generator, ok := c.LanguageBoilerplate[cfg.Language]
+	gen, ok := c.LanguageBoilerplate[cfg.Language]
 	if !ok {
-		return errors.New("no boilerplate generator found")
+		return errors.New("no boilerplate generator found for " + cfg.Language)
 	}
-	err := generator.Generate(cfg, projectRoot)
-	if err != nil {
+	if err := gen.Generate(cfg, projectRoot); err != nil {
 		return fmt.Errorf("boilerplate generation failed for %s: %w", cfg.Language, err)
 	}
 	return nil
