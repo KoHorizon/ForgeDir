@@ -1,29 +1,25 @@
 package generator
 
-import "maps"
+import "github.com/KoHorizon/ForgeDir/internal/config"
 
-// BoilerplateGenerator is the interface that every language-specific
-// generator implementation must satisfy. Using this interface allows the
-// registry to accept any supported language instance, enabling easy
-// dependency injection into the Coordinator.
-var (
-	registered = make(map[string]BoilerplateGenerator)
-)
-
-// Register registers a new generator under its language key
-// and panics if that key is already in use.
-func Register(g BoilerplateGenerator) {
-	lang := g.GetLanguage()
-	if _, exists := registered[lang]; exists {
-		panic("generator: duplicate registration for language " + lang)
-	}
-	registered[lang] = g
+// Generator is your interface for scaffolding.
+type Generator interface {
+	GetLanguage() string
+	Generate(cfg *config.Config, root string) error
 }
 
-// All returns a copy of the registry so callers can safely enumerate
-// without mutating internal state.
-func All() map[string]BoilerplateGenerator {
-	copy := make(map[string]BoilerplateGenerator, len(registered))
-	maps.Copy(copy, registered)
-	return copy
+var registry = make(map[string]Generator)
+
+// Register adds a Generator to the map by its Language key.
+func Register(g Generator) {
+	registry[g.GetLanguage()] = g
+}
+
+// All returns every registered Generator.
+func All() []Generator {
+	gens := make([]Generator, 0, len(registry))
+	for _, g := range registry {
+		gens = append(gens, g)
+	}
+	return gens
 }

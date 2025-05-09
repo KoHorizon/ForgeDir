@@ -3,11 +3,12 @@ package builder
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 )
 
 type FileSystemCreator interface {
 	CreateFolder(path string, permission os.FileMode) error
-	CreateFile(path string, permission os.FileMode) error
+	WriteFile(path string, content []byte, permission os.FileMode) error
 }
 
 type OSFileSystemCreator struct{}
@@ -50,19 +51,19 @@ func (o *OSFileSystemCreator) CreateFolder(folderPath string, permission os.File
 	return nil
 }
 
-// Flags used :
-// - os.O_CREATE: Create the file if it doesn't exist
-// - os.O_WRONLY: Open the file for write-only access
-// - os.O_TRUNC:  Truncate the file if it already exists (clear contents)
-//
-// CreateFile creates a file
-func (o *OSFileSystemCreator) CreateFile(filePath string, permission os.FileMode) error {
-	file, err := os.OpenFile(filePath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, permission)
-	if err != nil {
-		return err
+// WriteFile ensures the parent directory exists, then creates or truncates
+// the file at path and writes the provided content with the specified permission.
+func (o *OSFileSystemCreator) WriteFile(path string, content []byte, permission os.FileMode) error {
+	// Ensure parent directory exists
+	dir := filepath.Dir(path)
+	if err := os.MkdirAll(dir, DefaultFolderPermission); err != nil {
+		return fmt.Errorf("mkdir parent %s: %w", dir, err)
 	}
-	defer file.Close()
-	fmt.Printf("Created file : %s\n", filePath)
+	// Write file content
+	if err := os.WriteFile(path, content, permission); err != nil {
+		return fmt.Errorf("write file %s: %w", path, err)
+	}
+	fmt.Printf("Wrote file: %s\n", path)
 	return nil
 }
 
