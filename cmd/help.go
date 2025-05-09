@@ -10,7 +10,7 @@ var helpCmd = &cobra.Command{
 	Use:   "help",
 	Short: "Show help for fgdir (overide)",
 	Run: func(cmd *cobra.Command, args []string) {
-		// you can print whatever custom help layout you like here:
+		// Print custom help layout here:
 		fmt.Println(`
 fgdir is a project-scaffolding CLI.
 
@@ -28,4 +28,8 @@ Available Commands:
 Use "fgdir [command] --help" for more information about a command.
         `)
 	},
+}
+
+func init() {
+	rootCmd.AddCommand(initCmd)
 }

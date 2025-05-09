@@ -24,10 +24,6 @@ func init() {
 	rootCmd.CompletionOptions.DisableDefaultCmd = true
 	// Romoving the built-in help “sub” command
 	rootCmd.SetHelpCommand(&cobra.Command{Hidden: true})
-
-	// Custom commands
-	rootCmd.AddCommand(initCmd)
-	rootCmd.AddCommand(helpCmd)
 }
 
 // Execute runs the CLI.

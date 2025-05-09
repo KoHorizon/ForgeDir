@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"embed"
 	"fmt"
-	"io/fs"
 	"path/filepath"
 	"strings"
 	"text/template"
@@ -39,17 +38,44 @@ func (g *GenericGenerator) GetLanguage() string {
 }
 
 // Generate renders templates into existing files under root.
+// Only iterate the files listed in your config.Structure
 func (g *GenericGenerator) Generate(cfg *config.Config, root string) error {
-	return filepath.WalkDir(root, g.walkFunc(root))
-}
+	// 1. flatten your YAML tree into a list of relative file paths
+	var files []string
 
-func (g *GenericGenerator) walkFunc(root string) fs.WalkDirFunc {
-	return func(path string, d fs.DirEntry, err error) error {
-		if err != nil || d.IsDir() {
+	// Simple DFS with an inline stack of (nodes, basePath)
+	stack := []struct {
+		nodes []config.StructureNode
+		base  string
+	}{{cfg.Structure, ""}}
+
+	for len(stack) > 0 {
+		// pop
+		frame := stack[len(stack)-1]
+		stack = stack[:len(stack)-1]
+
+		for _, n := range frame.nodes {
+			rel := filepath.Join(frame.base, n.Name)
+			if n.Type == config.TypeDir {
+				// push child directory
+				stack = append(stack, struct {
+					nodes []config.StructureNode
+					base  string
+				}{n.Children, rel})
+			} else if n.Type == config.TypeFile {
+				files = append(files, rel)
+			}
+		}
+	}
+
+	// 2. render templates only for the files your spec asked for
+	for _, rel := range files {
+		target := filepath.Join(root, rel)
+		if err := g.generateFile(target, root); err != nil {
 			return err
 		}
-		return g.generateFile(path, root)
 	}
+	return nil
 }
 
 // generateFile tries in order: file-specific then catch-all (_.tmpl).

@@ -1,8 +1,8 @@
-// cmd/init.go
 package cmd
 
 import (
 	"fmt"
+	"path/filepath"
 
 	"github.com/KoHorizon/ForgeDir/internal/builder"
 	"github.com/KoHorizon/ForgeDir/internal/config"
@@ -11,14 +11,17 @@ import (
 )
 
 var initCmd = &cobra.Command{
-	Use:   "init <spec.yaml>",
+	Use:   "init [spec.yaml]",
 	Short: "Read a YAML spec and scaffold the project",
-	Args:  cobra.ExactArgs(1),
+	Args:  cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		// allow overriding the config flag by positional arg
-		cfgFile = args[0]
+		if len(args) == 1 {
+			cfgFile = args[0]
+		}
 
-		// 1. Load
+		outputDir, _ = filepath.Abs(outputDir)
+
+		// 1. Load config
 		cfg, err := config.LoadConfigFromYaml(cfgFile)
 		if err != nil {
 			return fmt.Errorf("loading config %q: %w", cfgFile, err)
@@ -31,7 +34,7 @@ var initCmd = &cobra.Command{
 			return fmt.Errorf("creating structure: %w", err)
 		}
 
-		// 3. Wire generators & run boilerplate
+		// 3. Generate boilerplate
 		coord := generator.NewCoordinator(generator.All())
 		fmt.Printf("Generating boilerplate for %q in %s …\n", cfg.Language, outputDir)
 		if err := coord.RunBoilerplateGeneration(cfg, outputDir); err != nil {
@@ -44,14 +47,14 @@ var initCmd = &cobra.Command{
 }
 
 func init() {
-	// global flags
-	rootCmd.PersistentFlags().StringVarP(
+	initCmd.Flags().StringVarP(
 		&cfgFile, "config", "c", "config.yaml",
 		"path to the YAML project spec",
 	)
-	rootCmd.PersistentFlags().StringVarP(
-		&outputDir, "output", "o", "./tmp/generated-structure",
-		"directory where the project will be generated",
+	initCmd.Flags().StringVarP(
+		&outputDir, "output", "o", ".",
+		"directory where the project will be generated (default is current directory)",
 	)
-	// register subcommands
+
+	rootCmd.AddCommand(initCmd)
 }
