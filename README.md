@@ -11,9 +11,11 @@ ForgeDir is a CLI tool written in Go that scaffolds a project structure from a s
 
 1. [Features](#features)
 2. [Getting Started](#getting-started)
+
    * [Prerequisites](#prerequisites)
    * [Installation](#installation)
 3. [Usage](#usage)
+
    * [Commands](#commands)
 4. [Specification (`spec.yaml`)](#specification-specyaml)
 5. [Custom Templates](#custom-templates)
@@ -44,17 +46,15 @@ ForgeDir is a CLI tool written in Go that scaffolds a project structure from a s
 
 ### Installation
 
-Choose one of the following methods:
-
-#### 1. Rapid iteration with `go run`
+#### Rapid iteration with `go run`
 
 ```bash
-# From your project root (with main.go):
+# From your project root:
 go run main.go --help
 go run main.go init config.yaml
 ```
 
-#### 2. Build a standalone binary
+#### Build a standalone binary
 
 ```bash
 # Build locally:
@@ -65,7 +65,7 @@ go build -o fgdir main.go
 ./fgdir init config.yaml
 ```
 
-#### 3. Install into your \$GOBIN
+#### Install into your \$GOBIN
 
 ```bash
 # Assuming module path github.com/yourname/forgedir:
@@ -79,8 +79,6 @@ fgdir init config.yaml
 ---
 
 ## Usage
-
-Once installed, `fgdir` supports the following commands:
 
 ```bash
 # Show help:
@@ -117,7 +115,7 @@ fgdir init -c myspec.yaml -o ./outdir
 
 ## Specification (`spec.yaml`)
 
-Your project spec is a YAML file, for example:
+Define your project spec in YAML, for example:
 
 ```yaml
 project:
@@ -144,12 +142,16 @@ ForgeDir ships with built‑in templates in `templates/<lang>/` embedded into th
 
 1. Create a local `./templates/<lang>/` directory beside your spec.
 2. Copy any default `*.tmpl` files you wish to customize into that folder.
-3. Run `fgdir init --templates ./templates spec.yaml`.
+3. Run:
+
+```bash
+fgdir init --templates ./templates spec.yaml
+```
 
 The lookup order is:
 
 1. Files in your `--templates` folder (OSFS overrides)
-2. Built‑in embedded templates (go\:embed defaults)
+2. Built-in embedded templates (go\:embed defaults)
 
 Missing files still fall back to defaults, so you only need to override the ones you care about.
 
@@ -157,29 +159,27 @@ Missing files still fall back to defaults, so you only need to override the ones
 
 ## Publishing & Releases
 
-1. Push your code to a public repo (e.g. GitHub) with module path in `go.mod`:
+1. **Push your code** to a public repo (e.g. GitHub) with module path in `go.mod`:
 
    ```go
    module github.com/yourname/forgedir
    ```
 
-2. Tag a release:
+2. **Tag a release**:
 
    ```bash
+   git tag v0.1.0
+   git push origin v0.1.0
    ```
 
-git tag v0.1.0
-git push origin v0.1.0
-
-````
-
-3. Instruct users to install via:
+3. **Instruct users to install via**:
 
    ```bash
-go install github.com/yourname/forgedir@v0.1.0
-````
+   go install github.com/yourname/forgedir@v0.1.0
+   ```
 
 4. (Optional) Use [goreleaser](https://goreleaser.com/) in CI to publish pre‑built binaries for Linux/Mac/Windows on GitHub Releases.
+
 5. (Optional) Provide Homebrew/Scoop/Apt formulas so users can install via package managers.
 
 ---
