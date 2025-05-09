@@ -52,7 +52,8 @@ func (g *GenericGenerator) walkFunc(root string) fs.WalkDirFunc {
 	}
 }
 
-// generateFile tries in order: file-specific and then catch-all (_.tmpl).
+// generateFile tries in order: file-specific then catch-all (_.tmpl).
+// It passes generic data into the template, not Go-specific.
 func (g *GenericGenerator) generateFile(path, root string) error {
 	name := filepath.Base(path)
 
@@ -62,13 +63,26 @@ func (g *GenericGenerator) generateFile(path, root string) error {
 		tpl = g.tmpl.Lookup("(default).tmpl")
 	}
 
-	// Prepare template data
+	// Prepare generic template data
+	// Language: the configured language
+	// DirName: the name of the file's directory under root (or empty)
+	// FileName: the base name without extension
+	dir := filepath.Dir(path)
+	rel, _ := filepath.Rel(root, dir)
+	d := ""
+	if rel != "." {
+		// take only the last segment
+		parts := strings.Split(rel, string(filepath.Separator))
+		d = parts[len(parts)-1]
+	}
 	data := struct {
-		PackageName string
-		FileName    string
+		Language string
+		DirName  string
+		FileName string
 	}{
-		PackageName: determinePackageName(path, root),
-		FileName:    strings.TrimSuffix(name, filepath.Ext(name)),
+		Language: g.lang,
+		DirName:  d,
+		FileName: strings.TrimSuffix(name, filepath.Ext(name)),
 	}
 
 	var content []byte
@@ -83,9 +97,9 @@ func (g *GenericGenerator) generateFile(path, root string) error {
 	}
 
 	// Ensure directory exists and write file
-	dir := filepath.Dir(path)
-	if err := g.fs.CreateFolder(dir, builder.DefaultFolderPermission); err != nil {
-		return fmt.Errorf("creating folder %q: %w", dir, err)
+	dirPath := filepath.Dir(path)
+	if err := g.fs.CreateFolder(dirPath, builder.DefaultFolderPermission); err != nil {
+		return fmt.Errorf("creating folder %q: %w", dirPath, err)
 	}
 	if err := g.fs.WriteFile(path, content, builder.DefaultFilePermission); err != nil {
 		return fmt.Errorf("writing file %q: %w", path, err)
@@ -111,14 +125,4 @@ func init() {
 		}
 		Register(gen)
 	}
-}
-
-// determinePackageName infers the Go package name based on directory structure.
-func determinePackageName(filePath, root string) string {
-	dir := filepath.Dir(filePath)
-	rel, err := filepath.Rel(root, dir)
-	if err != nil || rel == "." || strings.HasPrefix(rel, "cmd") {
-		return "main"
-	}
-	return filepath.Base(dir)
 }
