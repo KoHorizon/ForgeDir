@@ -44,6 +44,14 @@ var initCmd = &cobra.Command{
 }
 
 func init() {
-	// if needed, you can add init-specific flags here (but config/output are global)
-	// e.g. initCmd.Flags().Bool("dry-run", false, "simulate only")
+	// global flags
+	rootCmd.PersistentFlags().StringVarP(
+		&cfgFile, "config", "c", "config.yaml",
+		"path to the YAML project spec",
+	)
+	rootCmd.PersistentFlags().StringVarP(
+		&outputDir, "output", "o", "./tmp/generated-structure",
+		"directory where the project will be generated",
+	)
+	// register subcommands
 }

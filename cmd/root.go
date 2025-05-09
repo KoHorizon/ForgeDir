@@ -17,23 +17,17 @@ var (
 var rootCmd = &cobra.Command{
 	Use:   "fgdir",
 	Short: "Scaffold a project structure from your YAML spec",
-	// no Run/RuneE here
 }
 
 func init() {
-	// Persistent flags are available to all subcommands and
-	// control global behavior of the CLI.
-	// global flags
-	rootCmd.PersistentFlags().StringVarP(
-		&cfgFile, "config", "c", "config.yaml",
-		"path to the YAML project spec",
-	)
-	rootCmd.PersistentFlags().StringVarP(
-		&outputDir, "output", "o", "./tmp/generated-structure",
-		"directory where the project will be generated",
-	)
-	// register subcommands
+	// Disabling the built-in completion
+	rootCmd.CompletionOptions.DisableDefaultCmd = true
+	// Romoving the built-in help “sub” command
+	rootCmd.SetHelpCommand(&cobra.Command{Hidden: true})
+
+	// Custom commands
 	rootCmd.AddCommand(initCmd)
+	rootCmd.AddCommand(helpCmd)
 }
 
 // Execute runs the CLI.
