@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 // See LICENSE file in the project root for full license information.
 
-package cmd
+package main
 
 import (
 	"github.com/spf13/cobra"
