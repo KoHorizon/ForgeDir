@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 // See LICENSE file in the project root for full license information.
 
-package main
+package cmd
 
 import (
 	"fmt"
@@ -35,5 +35,5 @@ Use "fgdir [command] --help" for more information about a command.
 }
 
 func init() {
-	rootCmd.AddCommand(initCmd)
+	rootCmd.AddCommand(helpCmd)
 }

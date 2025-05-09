@@ -4,6 +4,8 @@
 
 package main
 
+import "github.com/KoHorizon/ForgeDir/cmd"
+
 func main() {
-	Execute()
+	cmd.Execute()
 }
