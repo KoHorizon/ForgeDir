@@ -1,65 +1,231 @@
 # ForgeDir
 
-<!-- Badges -->
-
 [![Go Report Card](https://goreportcard.com/badge/github.com/KoHorizon/ForgeDir)](https://goreportcard.com/report/github.com/KoHorizon/ForgeDir)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-A flexible, YAML-driven CLI tool written in Go to automate the creation of project directory and file structures.
+ForgeDir is a CLI tool written in Go that scaffolds a project structure from a simple YAML specification, generating both folders/files and language‑specific boilerplate templates. It uses Cobra for the CLI interface and follows clean‑architecture principles to separate concerns between configuration loading, filesystem operations, and template generation.
 
 ---
 
-## ✨ Overview
+## Table of Contents
 
-Initializing a new project often involves manually creating nested folders and placeholder files. **ForgeDir** streamlines this setup by reading a simple YAML spec and instantly scaffolding the desired layout.
-
-This tool is under active development and doubles as a practical learning project for Go developers focusing on building CLI apps and implementing clean architecture principles.
-
----
-
-## 🚀 Features
-
-* **YAML-driven**: Define any nested directory/file hierarchy in a human-readable YAML format.
-* **Fast & Lightweight**: Leverages Go's standard library—no external dependencies for the core scaffold.
-* **Extensible**: Built with a plugin-ready generator system for future language-agnostic boilerplate.
-* **Cross-platform**: Works on Linux, macOS, and Windows.
-
----
-
-## 🔧 Getting Started
-
-ForgeDir aims to simplify scaffolding new projects by interpreting a YAML configuration and generating the necessary directory and file structure automatically. Installation and detailed usage instructions will be provided in a future update.
+1. [Features](#features)
+2. [Getting Started](#getting-started)
+   * [Prerequisites](#prerequisites)
+   * [Installation](#installation)
+3. [Usage](#usage)
+   * [Commands](#commands)
+4. [Specification (`spec.yaml`)](#specification-specyaml)
+5. [Custom Templates](#custom-templates)
+6. [Publishing & Releases](#publishing--releases)
+7. [Versioning](#versioning)
+8. [Testing](#testing)
+9. [Contributing](#contributing)
+10. [License](#license)
 
 ---
 
-## 🛠️ Development
+## Features
 
-Directory structure follows Cobra conventions:
+* Scaffold project directories & empty files from a YAML spec
+* Generate language‑specific boilerplate via Go `embed` and `text/template`
+* Built with Go, using Cobra for an idiomatic CLI
+* Extensible: add new language templates by dropping `*.tmpl` files
+* Supports user overrides of templates via a local or global `templates/` directory
 
+---
+
+## Getting Started
+
+### Prerequisites
+
+* Go 1.18 or newer installed
+* Git (for cloning and tagging releases)
+
+### Installation
+
+Choose one of the following methods:
+
+#### 1. Rapid iteration with `go run`
+
+```bash
+# From your project root (with main.go):
+go run main.go --help
+go run main.go init config.yaml
 ```
-cmd/       # CLI entrypoints
-internal/  # Core builder, config loader, and generator logic
+
+#### 2. Build a standalone binary
+
+```bash
+# Build locally:
+go build -o fgdir main.go
+
+# Run:
+./fgdir --help
+./fgdir init config.yaml
 ```
 
-Use `go run main.go` for rapid iteration without rebuilding.
+#### 3. Install into your \$GOBIN
+
+```bash
+# Assuming module path github.com/yourname/forgedir:
+go install github.com/yourname/forgedir@latest
+
+# Now you can run:
+fgdir --help
+fgdir init config.yaml
+```
 
 ---
 
-## 🤝 Contributing
+## Usage
 
-Contributing to ForgeDir is easy and encouraged under the project's MIT License. You don't need special permissions—just follow these steps:
+Once installed, `fgdir` supports the following commands:
 
-1. **Fork the repository.**
-2. **Create a feature branch:** `git checkout -b feature/my-feature`
-3. **Make your changes.**
-4. **Commit your changes:** `git commit -m "feat: add my feature"`
-5. **Push to your branch:** `git push origin feature/my-feature`
-6. **Open a Pull Request** against the `dev` branch (or whichever branch is currently active for development).
+```bash
+# Show help:
+fgdir --help
 
-By contributing, you agree that your work will be licensed under the MIT License. No additional Contributor License Agreement (CLA) is required unless otherwise stated.
+# Scaffold a project from your YAML spec:
+fgdir init [flags] --templates <path> <spec.yaml>
+
+# Validate a spec without scaffolding:
+fgdir validate <spec.yaml>
+
+# List available templates (built-in or for a specific language):
+fgdir list-templates [--lang go|js|py]
+
+# Clean up a generated project:
+fgdir clean <target-dir>
+
+# Print version:
+fgdir version
+```
+
+Common global flags:
+
+* `-c, --config <path>`
+* `-o, --output <path>`
+
+Example:
+
+```bash
+fgdir init -c myspec.yaml -o ./outdir
+```
 
 ---
 
-## 📜 License
+## Specification (`spec.yaml`)
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+Your project spec is a YAML file, for example:
+
+```yaml
+project:
+  name: "my-service"
+  language: "go"
+
+structures:
+  - path: "cmd/myservice"
+  - path: "internal/server"
+  - path: "templates"
+
+files:
+  - path: "main.go"
+  - path: "Dockerfile"
+```
+
+Use `fgdir validate spec.yaml` to check for schema errors before scaffolding.
+
+---
+
+## Custom Templates
+
+ForgeDir ships with built‑in templates in `templates/<lang>/` embedded into the binary. To override or extend them:
+
+1. Create a local `./templates/<lang>/` directory beside your spec.
+2. Copy any default `*.tmpl` files you wish to customize into that folder.
+3. Run `fgdir init --templates ./templates spec.yaml`.
+
+The lookup order is:
+
+1. Files in your `--templates` folder (OSFS overrides)
+2. Built‑in embedded templates (go\:embed defaults)
+
+Missing files still fall back to defaults, so you only need to override the ones you care about.
+
+---
+
+## Publishing & Releases
+
+1. Push your code to a public repo (e.g. GitHub) with module path in `go.mod`:
+
+   ```go
+   module github.com/yourname/forgedir
+   ```
+
+2. Tag a release:
+
+   ```bash
+   ```
+
+git tag v0.1.0
+git push origin v0.1.0
+
+````
+
+3. Instruct users to install via:
+
+   ```bash
+go install github.com/yourname/forgedir@v0.1.0
+````
+
+4. (Optional) Use [goreleaser](https://goreleaser.com/) in CI to publish pre‑built binaries for Linux/Mac/Windows on GitHub Releases.
+5. (Optional) Provide Homebrew/Scoop/Apt formulas so users can install via package managers.
+
+---
+
+## Versioning
+
+We follow [Semantic Versioning](https://semver.org/):
+
+* **v0.x**: initial development, breaking changes allowed
+* **v1.0.0**: stable release, backwards compatibility guaranteed
+
+Tag incremental releases (v0.2.0, v0.3.0, …) as you add features and tests. Reserve `v1.0.0` for an API‑stable milestone.
+
+---
+
+## Testing
+
+We recommend writing unit tests for:
+
+* `config` package (loading & validation of specs)
+* `builder` package (folder/file creation logic)
+* `generator` package (template rendering)
+* CLI commands (using Cobra’s `ExecuteC` in tests)
+
+Run tests with:
+
+```bash
+go test ./... -cover
+```
+
+Aim for high coverage on core packages before tagging each release.
+
+---
+
+## Contributing
+
+1. Fork the repo
+2. Create a feature branch (`git checkout -b feat/your-feature`)
+3. Write tests and code
+4. Ensure all tests pass
+5. Open a Pull Request with a clear description of changes
+
+Please adhere to Go idioms and existing code style.
+
+---
+
+## License
+
+This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
