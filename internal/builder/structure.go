@@ -36,7 +36,7 @@ func (b *StructureBuilder) createNodes(nodes []config.StructureNode, currPath st
 				return err
 			}
 		case config.TypeFile:
-			if err := b.fs.CreateFile(target, DefaultFilePermission); err != nil {
+			if err := b.fs.WriteFile(target, []byte{}, DefaultFilePermission); err != nil {
 				return fmt.Errorf("touch %q: %w", target, err)
 			}
 		default:
