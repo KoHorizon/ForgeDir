@@ -19,9 +19,8 @@ ForgeDir is a CLI tool written in Go that scaffolds a project structure from a s
    * [Commands](#commands)
 4. [Specification (`spec.yaml`)](#specification-specyaml)
 5. [Custom Templates](#custom-templates)
-6. [Testing](#testing)
-7. [Contributing](#contributing)
-8. [License](#license)
+6. [Contributing](#contributing)
+7. [License](#license)
 
 ---
 
@@ -153,24 +152,6 @@ The lookup order is:
 
 Missing files still fall back to defaults, so you only need to override the ones you care about.
 
----
-
-## Testing
-
-We recommend writing unit tests for:
-
-* `config` package (loading & validation of specs)
-* `builder` package (folder/file creation logic)
-* `generator` package (template rendering)
-* CLI commands (using Cobra’s `ExecuteC` in tests)
-
-Run tests with:
-
-```bash
-go test ./... -cover
-```
-
-Aim for high coverage on core packages before tagging each release.
 
 ---
 
