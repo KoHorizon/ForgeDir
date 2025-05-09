@@ -15,12 +15,8 @@ ForgeDir is a CLI tool written in Go that scaffolds a project structure from a s
    * [Prerequisites](#prerequisites)
    * [Installation](#installation)
 3. [Usage](#usage)
-
-   * [Commands](#commands)
 4. [Specification (`spec.yaml`)](#specification-specyaml)
-5. [Custom Templates](#custom-templates)
-6. [Contributing](#contributing)
-7. [License](#license)
+5. [License](#license)
 
 ---
 
@@ -58,7 +54,7 @@ go run main.go init config.yaml
 go build -o fgdir main.go
 
 # Run:
-./fgdir --help
+./fgdir help
 ./fgdir init config.yaml
 ```
 
@@ -69,7 +65,7 @@ go build -o fgdir main.go
 go install github.com/yourname/forgedir@latest
 
 # Now you can run:
-fgdir --help
+fgdir help
 fgdir init config.yaml
 ```
 
@@ -79,34 +75,15 @@ fgdir init config.yaml
 
 ```bash
 # Show help:
-fgdir --help
-
+fgdir help
 # Scaffold a project from your YAML spec:
-fgdir init [flags] --templates <path> <spec.yaml>
-
-# Validate a spec without scaffolding:
-fgdir validate <spec.yaml>
-
-# List available templates (built-in or for a specific language):
-fgdir list-templates [--lang go|js|py]
-
-# Clean up a generated project:
-fgdir clean <target-dir>
-
-# Print version:
-fgdir version
+fgdir init [flags] <spec.yaml>
 ```
 
-Common global flags:
+Common flags for `init`:
 
-* `-c, --config <path>`
-* `-o, --output <path>`
-
-Example:
-
-```bash
-fgdir init -c myspec.yaml -o ./outdir
-```
+* `-c, --config <path>`   path to the YAML project spec (default: `config.yaml`)
+* `-o, --output <path>`   directory where the project will be generated (default: current directory)
 
 ---
 
@@ -115,55 +92,33 @@ fgdir init -c myspec.yaml -o ./outdir
 Define your project spec in YAML, for example:
 
 ```yaml
-project:
-  name: "my-service"
-  language: "go"
-
-structures:
-  - path: "cmd/myservice"
-  - path: "internal/server"
-  - path: "templates"
-
-files:
-  - path: "main.go"
-  - path: "Dockerfile"
+# config.yaml
+projectName: my_project
+language: go
+structure:
+  - type: dir # Define a directory
+    name: cmd
+    children:
+      - type: file
+        name: main.go
+  - type: dir
+    name: internal
+    children:
+      - type: file # Define a file
+        name: core.go
+  - type: dir
+    name: pkg
+    children:
+      - type: file
+        name: handler.go
+      - type: dir
+        name: api
+        children:
+          - type: file
+            name: handlers.go
 ```
 
-Use `fgdir validate spec.yaml` to check for schema errors before scaffolding.
-
----
-
-## Custom Templates
-
-ForgeDir ships with built‑in templates in `templates/<lang>/` embedded into the binary. To override or extend them:
-
-1. Create a local `./templates/<lang>/` directory beside your spec.
-2. Copy any default `*.tmpl` files you wish to customize into that folder.
-3. Run:
-
-```bash
-fgdir init --templates ./templates spec.yaml
-```
-
-The lookup order is:
-
-1. Files in your `--templates` folder (OSFS overrides)
-2. Built-in embedded templates (go\:embed defaults)
-
-Missing files still fall back to defaults, so you only need to override the ones you care about.
-
-
----
-
-## Contributing
-
-1. Fork the repo
-2. Create a feature branch (`git checkout -b feat/your-feature`)
-3. Write tests and code
-4. Ensure all tests pass
-5. Open a Pull Request with a clear description of changes
-
-Please adhere to Go idioms and existing code style.
+Use `fgdir init --help` to see available flags.
 
 ---
 
