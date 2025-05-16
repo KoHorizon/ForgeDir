@@ -9,10 +9,10 @@ import (
 
 // StructureBuilder builds a project scaffold.
 type StructureBuilder struct {
-	fs FileSystemCreator
+	fs FileSystem
 }
 
-func NewStructureBuilder(fs FileSystemCreator) *StructureBuilder {
+func NewStructureBuilder(fs FileSystem) *StructureBuilder {
 	return &StructureBuilder{
 		fs: fs,
 	}

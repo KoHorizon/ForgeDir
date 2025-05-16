@@ -32,7 +32,7 @@ var initCmd = &cobra.Command{
 		}
 
 		// 2. Build file tree
-		fs := builder.NewOSFileSystemCreator()
+		fs := builder.NewOSFileSystem()
 		sb := builder.NewStructureBuilder(fs)
 		if err := sb.Build(cfg, outputDir); err != nil {
 			return fmt.Errorf("creating structure: %w", err)
