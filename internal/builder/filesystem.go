@@ -6,15 +6,15 @@ import (
 	"path/filepath"
 )
 
-type FileSystemCreator interface {
+type FileSystem interface {
 	CreateFolder(path string, permission os.FileMode) error
 	WriteFile(path string, content []byte, permission os.FileMode) error
 }
 
-type OSFileSystemCreator struct{}
+type OSFileSystem struct{}
 
-func NewOSFileSystemCreator() *OSFileSystemCreator {
-	return &OSFileSystemCreator{}
+func NewOSFileSystem() *OSFileSystem {
+	return &OSFileSystem{}
 }
 
 // Common Folder Permissions:
@@ -42,7 +42,7 @@ func NewOSFileSystemCreator() *OSFileSystemCreator {
 // Note: Permissions are based on standard UNIX file mode bits, stable across Go versions.
 //
 // CreateFolder creates a folder
-func (o *OSFileSystemCreator) CreateFolder(folderPath string, permission os.FileMode) error {
+func (o *OSFileSystem) CreateFolder(folderPath string, permission os.FileMode) error {
 	err := os.MkdirAll(folderPath, permission)
 	if err != nil {
 		return err
@@ -53,7 +53,7 @@ func (o *OSFileSystemCreator) CreateFolder(folderPath string, permission os.File
 
 // WriteFile ensures the parent directory exists, then creates or truncates
 // the file at path and writes the provided content with the specified permission.
-func (o *OSFileSystemCreator) WriteFile(path string, content []byte, permission os.FileMode) error {
+func (o *OSFileSystem) WriteFile(path string, content []byte, permission os.FileMode) error {
 	// Ensure parent directory exists
 	dir := filepath.Dir(path)
 	if err := os.MkdirAll(dir, DefaultFolderPermission); err != nil {

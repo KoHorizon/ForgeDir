@@ -19,11 +19,11 @@ var tmplFS embed.FS
 type GenericGenerator struct {
 	lang string
 	tmpl *template.Template
-	fs   builder.FileSystemCreator
+	fs   builder.FileSystem
 }
 
 // NewGenericGenerator initializes a GenericGenerator for the given language.
-func NewGenericGenerator(lang string, fs builder.FileSystemCreator) (*GenericGenerator, error) {
+func NewGenericGenerator(lang string, fs builder.FileSystem) (*GenericGenerator, error) {
 	patterns := []string{filepath.Join("templates", lang, "*.tmpl")}
 	parsed, err := template.ParseFS(tmplFS, patterns...)
 	if err != nil {
@@ -135,7 +135,7 @@ func (g *GenericGenerator) generateFile(path, root string) error {
 }
 
 func init() {
-	fsCreator := builder.NewOSFileSystemCreator()
+	fsCreator := builder.NewOSFileSystem()
 	entries, err := tmplFS.ReadDir("templates")
 	if err != nil {
 		panic(fmt.Errorf("reading templates: %w", err))
