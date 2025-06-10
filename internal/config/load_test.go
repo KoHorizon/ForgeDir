@@ -1,4 +1,3 @@
-// internal/config/load_test.go
 package config_test
 
 import (

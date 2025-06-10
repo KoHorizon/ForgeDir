@@ -1,4 +1,3 @@
-// internal/generator/template_source.go
 package generator
 
 import (

@@ -8,6 +8,7 @@ import (
 	"fmt"
 
 	"github.com/KoHorizon/ForgeDir/internal/config"
+	"github.com/KoHorizon/ForgeDir/internal/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -62,7 +63,7 @@ func validateConfig(cfg *config.Config) error {
 		return fmt.Errorf("structure cannot be empty")
 	}
 
-	// Validate structure nodes
+	// Validate structure nodes (including path security)
 	return validateStructureNodes(cfg.Structure, "")
 }
 
@@ -79,6 +80,11 @@ func validateStructureNodes(nodes []config.StructureNode, path string) error {
 		// Validate node name
 		if node.Name == "" {
 			return fmt.Errorf("name is required at %s", currentPath)
+		}
+
+		// Security validation: Check for path traversal and other security issues
+		if err := utils.ValidatePath(node.Name); err != nil {
+			return fmt.Errorf("security validation failed for '%s' at %s: %w", node.Name, currentPath, err)
 		}
 
 		// Files cannot have children

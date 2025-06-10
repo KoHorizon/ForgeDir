@@ -1,4 +1,3 @@
-// coordinator.go
 package generator
 
 import (
