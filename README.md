@@ -24,12 +24,13 @@ ForgeDir is a CLI tool written in Go that scaffolds project structures from simp
 
 ## Features
 
-🚀 **Project Scaffolding**: Generate complete project structures from YAML specifications
-🎨 **Custom Templates**: Use built-in templates or create your own template collections
-🔧 **Language Agnostic**: Support for Go, Python, Rust, and easily extensible to any language
-📁 **Flexible Paths**: Works with relative paths, absolute paths, and `~` home directory expansion
-✅ **Validation**: Built-in config validation to catch errors before generation
-🏗️ **Clean Architecture**: Separation between structure creation and template generation
+- 🚀 **Project Scaffolding**: Generate complete project structures from YAML specifications
+- 🎨 **Custom Templates**: Use built-in templates or create your own template collections
+- 🔧 **Language Agnostic**: Support for Go, Python, Rust, and easily extensible to any language
+- 📁 **Flexible Paths**: Works with relative paths, absolute paths, and `~` home directory expansion
+- ✅ **Validation**: Built-in config validation to catch errors before generation
+- 🏗️ **Clean Architecture**: Separation between structure creation and template generation
+
 
 ---
 
