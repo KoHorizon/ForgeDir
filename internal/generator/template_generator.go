@@ -130,21 +130,21 @@ func (g *GenericGenerator) generateFile(path, root string) error {
 	return nil
 }
 
-// func init() {
-// 	fsCreator := builder.NewOSFileSystem()
-// 	entries, err := tmplFS.ReadDir("templates")
-// 	if err != nil {
-// 		panic(fmt.Errorf("reading templates: %w", err))
-// 	}
-// 	for _, e := range entries {
-// 		if !e.IsDir() {
-// 			continue
-// 		}
-// 		lang := e.Name()
-// 		gen, err := NewGenericGenerator(lang, fsCreator)
-// 		if err != nil {
-// 			panic(fmt.Errorf("loading %q templates: %w", lang, err))
-// 		}
-// 		Register(gen)
-// 	}
-// }
+// GetTemplatesForLanguage returns a list of template files for the given language
+func GetTemplatesForLanguage(language string) ([]string, error) {
+	templateDir := filepath.Join("templates", language)
+
+	entries, err := tmplFS.ReadDir(templateDir)
+	if err != nil {
+		return nil, fmt.Errorf("language '%s' not found", language)
+	}
+
+	var templates []string
+	for _, entry := range entries {
+		if !entry.IsDir() && strings.HasSuffix(entry.Name(), ".tmpl") {
+			templates = append(templates, entry.Name())
+		}
+	}
+
+	return templates, nil
+}

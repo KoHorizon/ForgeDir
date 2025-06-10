@@ -28,5 +28,5 @@ func init() {
 
 // Execute runs the CLI.
 func Execute() {
-	cobra.CheckErr(rootCmd.Execute())
+	rootCmd.Execute()
 }
