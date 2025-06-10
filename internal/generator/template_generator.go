@@ -2,7 +2,6 @@ package generator
 
 import (
 	"bytes"
-	"embed"
 	"fmt"
 	"path/filepath"
 	"strings"
@@ -11,9 +10,6 @@ import (
 	"github.com/KoHorizon/ForgeDir/internal/builder"
 	"github.com/KoHorizon/ForgeDir/internal/config"
 )
-
-//go:embed templates/*/*.tmpl
-var tmplFS embed.FS
 
 // GenericGenerator uses embedded templates for boilerplate generation.
 type GenericGenerator struct {
@@ -134,21 +130,21 @@ func (g *GenericGenerator) generateFile(path, root string) error {
 	return nil
 }
 
-func init() {
-	fsCreator := builder.NewOSFileSystem()
-	entries, err := tmplFS.ReadDir("templates")
-	if err != nil {
-		panic(fmt.Errorf("reading templates: %w", err))
-	}
-	for _, e := range entries {
-		if !e.IsDir() {
-			continue
-		}
-		lang := e.Name()
-		gen, err := NewGenericGenerator(lang, fsCreator)
-		if err != nil {
-			panic(fmt.Errorf("loading %q templates: %w", lang, err))
-		}
-		Register(gen)
-	}
-}
+// func init() {
+// 	fsCreator := builder.NewOSFileSystem()
+// 	entries, err := tmplFS.ReadDir("templates")
+// 	if err != nil {
+// 		panic(fmt.Errorf("reading templates: %w", err))
+// 	}
+// 	for _, e := range entries {
+// 		if !e.IsDir() {
+// 			continue
+// 		}
+// 		lang := e.Name()
+// 		gen, err := NewGenericGenerator(lang, fsCreator)
+// 		if err != nil {
+// 			panic(fmt.Errorf("loading %q templates: %w", lang, err))
+// 		}
+// 		Register(gen)
+// 	}
+// }

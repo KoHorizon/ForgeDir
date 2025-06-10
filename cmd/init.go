@@ -22,7 +22,6 @@ var initCmd = &cobra.Command{
 		if len(args) == 1 {
 			cfgFile = args[0]
 		}
-
 		outputDir, _ = filepath.Abs(outputDir)
 
 		// 1. Load config
@@ -39,8 +38,15 @@ var initCmd = &cobra.Command{
 		}
 
 		// 3. Generate boilerplate
-		coord := generator.NewCoordinator(generator.All())
 		fmt.Printf("Generating boilerplate for %q in %s …\n", cfg.Language, outputDir)
+
+		factory := generator.NewGeneratorFactory(fs)
+		generators, err := factory.CreateAvailableGenerators()
+		if err != nil {
+			return fmt.Errorf("creating generators: %w", err)
+		}
+
+		coord := generator.NewCoordinator(generators)
 		if err := coord.RunBoilerplateGeneration(cfg, outputDir); err != nil {
 			return fmt.Errorf("boilerplate generation failed: %w", err)
 		}
