@@ -19,9 +19,15 @@ var listTemplatesCmd = &cobra.Command{
 	Args:                  cobra.MaximumNArgs(1),
 	DisableFlagsInUseLine: true,
 	Run: func(cmd *cobra.Command, args []string) {
+		templateSource, err := generator.CreateTemplateSource(templatesDir)
+		if err != nil {
+			fmt.Printf("❌ Error setting up templates: %v\n", err)
+			return
+		}
+
 		// Create factory to get available generators
 		fs := builder.NewOSFileSystem()
-		factory := generator.NewGeneratorFactory(fs)
+		factory := generator.NewGeneratorFactory(fs, templateSource)
 		generators, err := factory.CreateAvailableGenerators()
 		if err != nil {
 			fmt.Printf("❌ Error loading templates: %v\n", err)

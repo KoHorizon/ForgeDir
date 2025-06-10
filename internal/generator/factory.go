@@ -19,28 +19,27 @@ var tmplFS embed.FS
 
 // GeneratorFactory creates generators for available languages
 type GeneratorFactory struct {
-	fs builder.FileSystem
+	fs             builder.FileSystem
+	templateSource TemplateSource
 }
 
-func NewGeneratorFactory(fs builder.FileSystem) *GeneratorFactory {
-	return &GeneratorFactory{fs: fs}
+func NewGeneratorFactory(fs builder.FileSystem, templateSource TemplateSource) *GeneratorFactory {
+	return &GeneratorFactory{
+		fs:             fs,
+		templateSource: templateSource,
+	}
 }
 
-// CreateAvailableGenerators scans embedded templates and creates generators
+// CreateAvailableGenerators scans available templates and creates generators
 func (f *GeneratorFactory) CreateAvailableGenerators() ([]Generator, error) {
-	entries, err := tmplFS.ReadDir("templates")
+	languages, err := f.templateSource.ListLanguages()
 	if err != nil {
-		return nil, fmt.Errorf("reading templates: %w", err)
+		return nil, fmt.Errorf("reading languages: %w", err)
 	}
 
 	var generators []Generator
-	for _, entry := range entries {
-		if !entry.IsDir() {
-			continue
-		}
-
-		lang := entry.Name()
-		gen, err := NewGenericGenerator(lang, f.fs)
+	for _, lang := range languages {
+		gen, err := f.createGeneratorForLanguage(lang)
 		if err != nil {
 			return nil, fmt.Errorf("creating generator for %s: %w", lang, err)
 		}
@@ -48,4 +47,22 @@ func (f *GeneratorFactory) CreateAvailableGenerators() ([]Generator, error) {
 	}
 
 	return generators, nil
+}
+
+func (f *GeneratorFactory) createGeneratorForLanguage(language string) (Generator, error) {
+	tmpl, err := f.templateSource.ParseTemplates(language)
+	if err != nil {
+		return nil, fmt.Errorf("parsing templates for %s: %w", language, err)
+	}
+
+	return &GenericGenerator{
+		lang: language,
+		tmpl: tmpl,
+		fs:   f.fs,
+	}, nil
+}
+
+// GetTemplatesForLanguage returns templates for a specific language
+func (f *GeneratorFactory) GetTemplatesForLanguage(language string) ([]string, error) {
+	return f.templateSource.ListTemplates(language)
 }

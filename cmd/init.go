@@ -39,8 +39,11 @@ var initCmd = &cobra.Command{
 
 		// 3. Generate boilerplate
 		fmt.Printf("Generating boilerplate for %q in %s …\n", cfg.Language, outputDir)
-
-		factory := generator.NewGeneratorFactory(fs)
+		templateSource, err := generator.CreateTemplateSource(templatesDir)
+		if err != nil {
+			return fmt.Errorf("setting up templates: %w", err)
+		}
+		factory := generator.NewGeneratorFactory(fs, templateSource)
 		generators, err := factory.CreateAvailableGenerators()
 		if err != nil {
 			return fmt.Errorf("creating generators: %w", err)

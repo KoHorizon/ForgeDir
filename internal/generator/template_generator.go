@@ -3,12 +3,14 @@ package generator
 import (
 	"bytes"
 	"fmt"
+	"os"
 	"path/filepath"
 	"strings"
 	"text/template"
 
 	"github.com/KoHorizon/ForgeDir/internal/builder"
 	"github.com/KoHorizon/ForgeDir/internal/config"
+	"github.com/KoHorizon/ForgeDir/internal/utils"
 )
 
 // GenericGenerator uses embedded templates for boilerplate generation.
@@ -147,4 +149,25 @@ func GetTemplatesForLanguage(language string) ([]string, error) {
 	}
 
 	return templates, nil
+}
+
+// CreateTemplateSource creates the appropriate template source based on templatesDir
+func CreateTemplateSource(customTemplatesDir string) (TemplateSource, error) {
+	if customTemplatesDir == "" {
+		// Use embedded templates
+		return NewEmbeddedTemplateSource(tmplFS), nil
+	}
+
+	// Expand path (handles ~ and relative paths)
+	expandedPath, err := utils.ExpandPath(customTemplatesDir)
+	if err != nil {
+		return nil, fmt.Errorf("expanding templates path '%s': %w", customTemplatesDir, err)
+	}
+
+	// Validate custom directory exists
+	if _, err := os.Stat(expandedPath); os.IsNotExist(err) {
+		return nil, fmt.Errorf("custom templates directory '%s' does not exist", expandedPath)
+	}
+
+	return NewFileSystemTemplateSource(expandedPath), nil
 }
