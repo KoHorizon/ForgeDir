@@ -1,4 +1,3 @@
-// internal/generator/coordinator_test.go
 package generator_test
 
 import (
