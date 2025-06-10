@@ -2,18 +2,16 @@ package generator
 
 import (
 	"bytes"
-	"embed"
 	"fmt"
+	"os"
 	"path/filepath"
 	"strings"
 	"text/template"
 
 	"github.com/KoHorizon/ForgeDir/internal/builder"
 	"github.com/KoHorizon/ForgeDir/internal/config"
+	"github.com/KoHorizon/ForgeDir/internal/utils"
 )
-
-//go:embed templates/*/*.tmpl
-var tmplFS embed.FS
 
 // GenericGenerator uses embedded templates for boilerplate generation.
 type GenericGenerator struct {
@@ -134,21 +132,42 @@ func (g *GenericGenerator) generateFile(path, root string) error {
 	return nil
 }
 
-func init() {
-	fsCreator := builder.NewOSFileSystem()
-	entries, err := tmplFS.ReadDir("templates")
+// GetTemplatesForLanguage returns a list of template files for the given language
+func GetTemplatesForLanguage(language string) ([]string, error) {
+	templateDir := filepath.Join("templates", language)
+
+	entries, err := tmplFS.ReadDir(templateDir)
 	if err != nil {
-		panic(fmt.Errorf("reading templates: %w", err))
+		return nil, fmt.Errorf("language '%s' not found", language)
 	}
-	for _, e := range entries {
-		if !e.IsDir() {
-			continue
+
+	var templates []string
+	for _, entry := range entries {
+		if !entry.IsDir() && strings.HasSuffix(entry.Name(), ".tmpl") {
+			templates = append(templates, entry.Name())
 		}
-		lang := e.Name()
-		gen, err := NewGenericGenerator(lang, fsCreator)
-		if err != nil {
-			panic(fmt.Errorf("loading %q templates: %w", lang, err))
-		}
-		Register(gen)
 	}
+
+	return templates, nil
+}
+
+// CreateTemplateSource creates the appropriate template source based on templatesDir
+func CreateTemplateSource(customTemplatesDir string) (TemplateSource, error) {
+	if customTemplatesDir == "" {
+		// Use embedded templates
+		return NewEmbeddedTemplateSource(tmplFS), nil
+	}
+
+	// Expand path (handles ~ and relative paths)
+	expandedPath, err := utils.ExpandPath(customTemplatesDir)
+	if err != nil {
+		return nil, fmt.Errorf("expanding templates path '%s': %w", customTemplatesDir, err)
+	}
+
+	// Validate custom directory exists
+	if _, err := os.Stat(expandedPath); os.IsNotExist(err) {
+		return nil, fmt.Errorf("custom templates directory '%s' does not exist", expandedPath)
+	}
+
+	return NewFileSystemTemplateSource(expandedPath), nil
 }

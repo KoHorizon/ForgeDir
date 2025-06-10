@@ -26,7 +26,6 @@ Available Commands:
   init               Read a YAML spec and scaffold the project
   validate           Validate that a spec.yaml is well-formed
   list-templates     List the built-in templates (or those for a given language)
-  clean              Clean up a previously scaffolded project
   version            Show the current version of the CLI
 
 Use "fgdir [command] --help" for more information about a command.
